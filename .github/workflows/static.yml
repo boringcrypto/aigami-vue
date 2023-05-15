@@ -37,6 +37,12 @@ jobs:
         with:
           node-version: '16'  # Specify a Node.js version to use
 
+      - name: Set Yarn version
+        run: yarn set version latest
+        
+      - name: Clear Yarn cache
+        run: yarn cache clean
+  
       - name: Install dependencies
         run: yarn install
 
