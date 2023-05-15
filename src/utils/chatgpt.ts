@@ -4,6 +4,13 @@ import { ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum, Con
 let openai: OpenAIApi;
 
 export async function get_chat(messages: ChatCompletionRequestMessage[]): Promise<string> {
+  const store = useAppStore();
+  console.log(store.keys.openai)
+  const configuration = new Configuration({
+    apiKey: store.keys.openai,
+  });
+  openai = new OpenAIApi(configuration);
+
   console.log(messages)
   const completion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
@@ -30,11 +37,6 @@ export async function get_response(message: string): Promise<string> {
 
 export default {
   install() {
-    const store = useAppStore();
-    const configuration = new Configuration({
-      apiKey: store.keys.openai,
-    });
-    openai = new OpenAIApi(configuration);
   },
   get_chat,
   get_response
