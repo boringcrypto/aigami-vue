@@ -42,8 +42,9 @@ export const useAppStore = defineStore('app', {
     },
 
     // Add your state here
-    name: "Martijn",
-    tags: "pirates, pirating, upgrade-able ships, trading, exploring, treasure",
+    name: "Alex",
+    tags: "wonderland, unicorns",
+    game_name: "",
     world: "",
     currency: "",
     currencyAmount: 0,

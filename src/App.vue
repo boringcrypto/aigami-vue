@@ -4,7 +4,7 @@
       color="primary"
       prominent
     >
-      <v-toolbar-title>Aigami</v-toolbar-title>
+      <v-toolbar-title>Aigami - {{ store.game_name }}</v-toolbar-title>
 
       <v-spacer></v-spacer>
 

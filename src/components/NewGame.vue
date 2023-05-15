@@ -31,6 +31,7 @@ The game has no visuals and no music. Don't use clichés.
 
 Create some information for this game as a dict in JSON format with the following keys:
 
+game_name: Name of the game
 world: Create an exciting game world in 100 words describing ONLY an engaging backstory for the player and their ultimate objective to complete the game.
 currency: Name of the currency (noun, plural)
 currencyAmount: The amount of currency you start with
@@ -87,6 +88,7 @@ const create_game = async () => {
 
         const response: any = json.parse(await get_chat(messages) || "{}")
         console.log(response)
+        store.game_name = response.game_name
         store.world = response.world
         store.currency = response.currency
         store.currencyAmount = response.currencyAmount
