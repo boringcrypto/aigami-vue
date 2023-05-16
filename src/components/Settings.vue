@@ -10,12 +10,33 @@
 
             <v-sheet width="800" class="mx-3">
                 <v-form @submit.prevent class="my-3">
-                    <v-text-field v-model="store.keys.openai" label="OpenAI API key"></v-text-field>
-                    <v-btn v-if="!store.keys.openai" href="https://platform.openai.com/account/api-keys" target="_blank" class="mb-2">Create OpenAI API key</v-btn>
+                    <v-text-field 
+                        density="compact"
+                        v-model="store.keys.openai" 
+                        hint="To create a game and have conversations you need an OpenAI API key. Click the button to go to the OpenAI website. If you don't have any trial credits, you will need to add payment details."
+                        label="OpenAI API key">
+                        <template v-slot:append>
+                            <v-btn v-slot:append
+                                v-if="!store.keys.openai"
+                                href="https://platform.openai.com/account/api-keys"
+                                target="_blank"
+                                variant="tonal"
+                                class="mb-2 outline float-end">Create OpenAI API key</v-btn>
+                        </template>
 
-                    <v-text-field v-model="store.keys.brainpet" label="BrainPet API key"></v-text-field>
-                    <v-btn v-if="!store.keys.brainpet" @click="connectBrainPet" class="mb-2">Connect BrainPet</v-btn>
-                    <v-btn v-if="!store.keys.brainpet && session" @click="checkBrainPet" class="mb-2">Check BrainPet</v-btn>
+                    </v-text-field>
+
+                    <v-text-field 
+                        density="compact"
+                        v-model="store.keys.brainpet"
+                        label="BrainPet API key"
+                        hint="To create images for location, characters, etc. you need a BrainPet API key. Click the button to connect to BrainPet. You will get 100 free credits."
+                    >
+                        <template v-slot:append>
+                            <v-btn v-if="!store.keys.brainpet" @click="connectBrainPet" class="mb-2" hint="Test">Connect BrainPet</v-btn>
+                            <v-btn v-if="!store.keys.brainpet && session" @click="checkBrainPet" class="mb-2">Check BrainPet</v-btn>
+                        </template>
+                    </v-text-field>
 
                     <v-textarea v-model="store.templates.new_game" label="New Game Template"></v-textarea>
                 </v-form>

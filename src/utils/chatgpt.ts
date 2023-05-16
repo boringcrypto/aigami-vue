@@ -12,10 +12,17 @@ export async function get_chat(messages: ChatCompletionRequestMessage[]): Promis
   openai = new OpenAIApi(configuration);
 
   console.log(messages)
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: messages
-  });
+  let completion: any;
+  try {
+    completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: messages
+    });
+  } catch (e) {
+    console.log(e, completion)
+
+    return ""
+  }
 
   console.log(completion)
 
