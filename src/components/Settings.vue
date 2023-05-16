@@ -1,8 +1,8 @@
 <template>
-    <v-dialog v-model="dialog" activator="parent" width="auto">
+    <v-dialog v-model="dialog" activator="parent" width="auto" :persistent="!store.keys.openai">
         <v-card>
             <v-toolbar dark color="primary">
-                <v-btn icon dark @click="dialog = false">
+                <v-btn icon dark @click="dialog = false" :disabled="!store.keys.openai">
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
                 <v-toolbar-title>Settings</v-toolbar-title>
@@ -47,10 +47,11 @@
 
 <script setup lang="ts">
 import { useAppStore } from '@/store/app';
+import { watch } from 'vue';
 import { ref } from 'vue';
 
-const dialog = ref(false)
 const store = useAppStore();
+const dialog = ref(!store.keys.openai)
 if (!store.keys) {
     store.keys = {
         openai: "",
@@ -79,4 +80,10 @@ const checkBrainPet = async () => {
         clearInterval(interval)
     }
 }
+
+watch([store.keys.openai], (value) => {
+    if (!value) {
+        dialog.value = true
+    }
+})
 </script>

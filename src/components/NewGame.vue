@@ -60,6 +60,7 @@ import json from '@/utils/json';
 
 const newGamePrompt = ref(null)
 const dialog = ref(false)
+const error = ref("")
 const store = useAppStore();
 const nameRules = [
     (value: string) => {
@@ -88,6 +89,11 @@ const create_game = async () => {
 
         const response: any = json.parse(await get_chat(messages) || "{}")
         console.log(response)
+        if (!response.game_name) {
+            dialog.value = true
+            error.value = "Something went wrong. Have you entered your OpenAI API key? Do you have credits on your OpenAI account?"
+            return
+        }
         store.game_name = response.game_name
         store.world = response.world
         store.currency = response.currency
