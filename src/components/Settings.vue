@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 import { useAppStore } from '@/store/app';
+import { storeToRefs } from 'pinia';
 import { watch } from 'vue';
 import { ref } from 'vue';
 
@@ -80,10 +81,4 @@ const checkBrainPet = async () => {
         clearInterval(interval)
     }
 }
-
-watch([store.keys.openai], (value) => {
-    if (!value) {
-        dialog.value = true
-    }
-})
 </script>

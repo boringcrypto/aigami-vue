@@ -9,11 +9,15 @@
             </v-toolbar>
 
             <v-sheet width="500" class="mx-3">
+                <v-alert v-if="error" dense type="info" class="my-3">
+                    {{ error }}
+                </v-alert>
                 <v-form @submit.prevent class="my-3">
                     <v-text-field v-model="store.name" :rules="nameRules" label="Character Name"></v-text-field>
                     <v-text-field v-model="store.tags" :rules="tagRules" label="Tags"></v-text-field>
                     <v-btn type="submit" block class="mt-2" @click="create_game">Create</v-btn>
                 </v-form>
+                {{ game_data }}
             </v-sheet>
         </v-card>
     </v-dialog>
@@ -61,6 +65,7 @@ import json from '@/utils/json';
 const newGamePrompt = ref(null)
 const dialog = ref(false)
 const error = ref("")
+const game_data = ref("")
 const store = useAppStore();
 const nameRules = [
     (value: string) => {
@@ -76,9 +81,8 @@ const tagRules = [
     }]
 
 const create_game = async () => {
-    dialog.value = false
     console.log(newGamePrompt.value)
-    ChatCompletionRequestMessageRoleEnum
+
     if (newGamePrompt.value) {
         const prompt = (newGamePrompt.value as HTMLTemplateElement).innerText
         console.log(prompt)
@@ -87,8 +91,10 @@ const create_game = async () => {
             { role: ChatCompletionRequestMessageRoleEnum.User, content: prompt }
         ];
 
-        const response: any = json.parse(await get_chat(messages) || "{}")
-        console.log(response)
+        await get_chat(messages, game_data)
+
+        const response: any = json.parse(game_data.value || "{}")
+        console.log(game_data.value)
         if (!response.game_name) {
             dialog.value = true
             error.value = "Something went wrong. Have you entered your OpenAI API key? Do you have credits on your OpenAI account?"
@@ -109,6 +115,8 @@ const create_game = async () => {
         store.npcs = response.npcs
         store.quests = response.quests
         store.artStyle = response.artStyle
+
+        dialog.value = false
     }
 }
 </script>

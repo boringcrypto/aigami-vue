@@ -1,5 +1,5 @@
 <template>
-    <template ref="imagePrompt">
+    <template ref="imagePromptTemplate">
         <pre>
             Start with "{{location_description}}" and then visually describe in 20 words what it looks like.
             Add a list of comma separated relevant keywords without a title prefix or starting a new paragraph.
@@ -17,7 +17,7 @@ import { nextTick } from 'vue';
 import { ref } from 'vue';
 
 const store = useAppStore();
-const imagePrompt = ref(null)
+const imagePromptTemplate = ref(null)
 const location_description = ref("")
 let busy = false
 
@@ -52,16 +52,12 @@ async function get_image(prompt: string) {
     })
     const job_id = await response.text()
 
-    console.log("response", job_id)
-
     const images = await (await fetch("https://app.brain.pet/pixelpet/v1/getJob?jobId=" + job_id, {
             headers: {
             'Content-Type': 'application/json',
             "Authorization": "Bearer " + store.keys.brainpet
         }
     })).json()
-
-    console.log("images", images.images[0])
 
     return images.images[0]
 }
@@ -74,19 +70,22 @@ const loop = async () => {
 
     for (const location of store.locations) {
         if (!location.imagePrompt) {
+            console.log("Generating image prompt for", location.name)
             location_description.value = location.description
             await nextTick()
-            if (!imagePrompt.value) {
+            if (!imagePromptTemplate.value) {
                 continue
             }
 
-            const prompt = (imagePrompt.value as HTMLTemplateElement).innerText
-            console.log("prompt", prompt)
-            location.imagePrompt = await get_response(prompt)
-            console.log("location.imagePrompt", location.imagePrompt)
+            const prompt = (imagePromptTemplate.value as HTMLTemplateElement).innerText
+            const imagePrompt = ref("")
+            await get_response(prompt, imagePrompt)
+            location.imagePrompt = imagePrompt.value
         }
 
         if (!location.image) {
+            console.log("Generating image prompt for", location.name)
+            console.log(location.imagePrompt)
             location.image = await get_image(location.imagePrompt)
         }
     }

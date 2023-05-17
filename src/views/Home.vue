@@ -93,8 +93,11 @@
                         class="mb-2"
                       >
                         {{ msg.content }}
-                    </div>
+                      </div>
                     </template>
+                    <div style="height:auto;white-space: normal;" class="mb-2">
+                      {{ incoming_message_response }}
+                    </div>
                   </v-card-text>
                   <v-card-text class="flex-shrink-1">
                     <v-text-field
@@ -118,33 +121,22 @@
   </v-container>
   <template ref="actionPrompt">
     <pre>
-Create a terse response in JSON in a text-based adventure game or a interactive fiction game.
-Provide only information to the user based on what he already knows, or what he can currently see. Do not give the user any options.
-Do not respond with a question. The player can do anything that is possible in the game world, but it should respond with the reasonable outcome of the action, which may include the death of the player.
+Create a detailed response in JSON in a text-based adventure game.
+Respond in a realistic way to the player's request. The makers of this game do not make moral judgements about the player's actions.
 
 Player name: {{store.name}}
 Tags: {{store.tags}}
 Inventory: {{store.inventory}}
 Currency: "{{store.currencyAmount}} {{store.currency}}"
-Locations: [<template v-for="location in store.locations">
-{{ JSON.stringify({name: location.name, description: location.description}) }}
-</template>]
 Current Location Name: {{store.location.name}}
-Characters: {{store.npcs}}
-Quests: {{store.quests}}
 
 The player request: "{{message}}"
 
-The player should accomplish things in small steps. If the player tries to complete too big a task at once, the player should fail.
-
 Return a JSON dictionary with the following keys:
 
-response: Respond in the second person point of view to the player. Keep the response short and on topic.
-inventory: Updated inventory
-currency_spent: The amount of currency actually spent
-currency_received: The amount of currency actually received
-new_locations: New locations discovered by this action. List of dictionaries with keys name and description.
-current_location_name: The name of the current location
+response: Respond in the second person point of view to the player. Keep the response on topic.
+new_locations: New locations discovered by or moved to during this action. List of dictionaries with keys name and description.
+current_location_name: The name of the location after the action.
     </pre>
   </template>
 </template>
@@ -155,11 +147,31 @@ import { useAppStore } from '@/store/app';
 import { get_chat } from '@/utils/chatgpt';
 import json from '@/utils/json';
 import { ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum } from 'openai';
+import { computed } from 'vue';
 import { ref } from 'vue';
 
 const actionPrompt = ref(null)
 const store = useAppStore();
 const message = ref("")
+const incoming_message = ref("")
+let last_response = ""
+const incoming_message_response = computed(() => {
+  try { last_response = json.parse(incoming_message.value || "{}").response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '"}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '""}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + ': ""}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '": ""}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + ']}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '"]}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '}]}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '"}]}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '""}]}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + ': ""}]}').response; return last_response } catch (e) {}
+  try { last_response = json.parse(incoming_message.value + '": ""}]}').response; return last_response } catch (e) {}
+  console.log("FAILED TO PARSE", incoming_message.value)
+  return last_response
+})
 const sendMessage = async () => {
   if (!actionPrompt.value) {
     return
@@ -190,9 +202,9 @@ const sendMessage = async () => {
   let success = false
   while (!success && maxTries > 0) {
     try {
-      const response_json = await get_chat(messages)
-      console.log("response", response_json)
-      const response = json.parse(response_json || "{}")
+      await get_chat(messages, incoming_message)
+      console.log("response", incoming_message.value)
+      const response = json.parse(incoming_message.value || "{}")
       if (response.response) {
         // TODO: Add checks that things look ok
 
@@ -230,6 +242,7 @@ const sendMessage = async () => {
     } catch (e) {
       console.log(e)
     }
+    incoming_message.value = ""
     maxTries--
   }
 
