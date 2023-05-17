@@ -4,22 +4,27 @@ import { type } from 'os'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-type Location = {
+type NPC = {
   name: string,
   description: string,
-  messages: ChatCompletionRequestMessage[],
   imagePrompt: string,
   image: string
 }
 
-type NPC = {
+type Location = {
   name: string,
-  description: string
+  description: string,
+  messages: ChatCompletionRequestMessage[],
+  npcs: NPC[],
+  imagePrompt: string,
+  image: string
 }
 
 type InventoryItem = {
   name: string,
-  description: string
+  description: string,
+  imagePrompt: string,
+  image: string
 }
 
 type Quest = {
@@ -51,14 +56,13 @@ export const useAppStore = defineStore('app', {
     locations: [] as Location[],
     currentLocation: 0,
     inventory: [] as InventoryItem[],
-    npcs: [] as NPC[],
     quests: [] as Quest[],
     artStyle: ""
   }),
   getters: {
-    location: (state) => {
+    location: (state): Location => {
       if (state.currentLocation >= state.locations.length || !state.locations[state.currentLocation]) {
-        return { name : "", description: "", messages: [], imagePrompt: "", image: "" }
+        return { name : "", description: "", messages: [], npcs: [], imagePrompt: "", image: "" }
       }
       return state.locations[state.currentLocation]
     }

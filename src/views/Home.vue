@@ -14,7 +14,7 @@
             @click="store.currentLocation = i"
           >
             <template v-slot:prepend>
-              <v-avatar color="surface-variant" :image="'data:image/png;base64,' + item.image"></v-avatar>
+              <v-avatar color="surface-variant" :image="item.image ? 'data:image/png;base64,' + item.image : ''"></v-avatar>
             </template>
 
             <v-list-item-title v-text="item.name"></v-list-item-title>
@@ -26,13 +26,13 @@
           <v-list-subheader>Characters</v-list-subheader>
 
           <v-list-item
-            v-for="(item, i) in store.npcs"
+            v-for="(item, i) in store.location.npcs"
             :key="i"
             :value="item"
             active-color="primary"
           >
             <template v-slot:prepend>
-              <v-avatar color="surface-variant"></v-avatar>
+              <v-avatar color="surface-variant" :image="item.image ? 'data:image/png;base64,' + item.image : ''"></v-avatar>
             </template>
 
             <v-list-item-title v-text="item.name"></v-list-item-title>

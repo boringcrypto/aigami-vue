@@ -112,7 +112,7 @@ const create_game = async () => {
             role: ChatCompletionRequestMessageRoleEnum.Assistant,
             content: response.intro as string
         }]
-        store.npcs = response.npcs
+        store.location.npcs = response.npcs
         store.quests = response.quests
         store.artStyle = response.artStyle
 

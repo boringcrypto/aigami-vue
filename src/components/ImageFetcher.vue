@@ -1,9 +1,17 @@
 <template>
-    <template ref="imagePromptTemplate">
+    <template ref="locationPromptTemplate">
         <pre>
-            Start with "{{location_description}}" and then visually describe in 20 words what it looks like.
+            Start with "{{location_description}}" and then visually describe in 20 words what the location looks like.
             Add a list of comma separated relevant keywords without a title prefix or starting a new paragraph.
             In this list you can add details of the location and the things that are there. 
+            Imagine this is a painting and add details about the composition, camera angle and lighting to the keyword list.
+            No more than 50 words in total.
+        </pre>
+    </template>
+    <template ref="characterPromptTemplate">
+        <pre>
+            Start with "{{character_description}}" and then visually describe in 20 words what the character looks like.
+            Add a list of comma separated relevant keywords without a title prefix or starting a new paragraph.
             Imagine this is a painting and add details about the composition, camera angle and lighting to the keyword list.
             No more than 50 words in total.
         </pre>
@@ -17,21 +25,23 @@ import { nextTick } from 'vue';
 import { ref } from 'vue';
 
 const store = useAppStore();
-const imagePromptTemplate = ref(null)
+const locationPromptTemplate = ref(null)
+const characterPromptTemplate = ref(null)
 const location_description = ref("")
+const character_description = ref("")
 let busy = false
 
-async function get_image(prompt: string) {
+async function get_image(prompt: string, width = 680, height = 512) {
     const response = await fetch("https://app.brain.pet/pixelpet/v1/generate", {
         method: "POST",
         body: JSON.stringify({
             "model_id": 151,
-            "prompt": prompt + ", " + store.artStyle + ", trending on cg society, trending on art station, digital masterpiece, intricate details, high quality, beautiful digital art, matte painting, concept art",
+            "prompt": prompt + ", " + store.artStyle,
             "negative_prompt": "",
             "batch_size": 1,
-            "steps": 30,
-            "width": 680,
-            "height": 512,
+            "steps": 25,
+            "width": width,
+            "height": height,
             "controlnet_units": [],
             "seed": 42,
             "cfg_scale": 7,
@@ -73,11 +83,11 @@ const loop = async () => {
             console.log("Generating image prompt for", location.name)
             location_description.value = location.description
             await nextTick()
-            if (!imagePromptTemplate.value) {
+            if (!locationPromptTemplate.value) {
                 continue
             }
 
-            const prompt = (imagePromptTemplate.value as HTMLTemplateElement).innerText
+            const prompt = (locationPromptTemplate.value as HTMLTemplateElement).innerText
             const imagePrompt = ref("")
             await get_response(prompt, imagePrompt)
             location.imagePrompt = imagePrompt.value
@@ -86,10 +96,32 @@ const loop = async () => {
         if (!location.image) {
             console.log("Generating image prompt for", location.name)
             console.log(location.imagePrompt)
-            location.image = await get_image(location.imagePrompt)
+            location.image = await get_image(location.imagePrompt + ", trending on cg society, trending on art station, digital masterpiece, intricate details, high quality, beautiful digital art, matte painting, concept art")
         }
     }
 
+    for (const character of store.location.npcs) {
+        if (!character.imagePrompt) {
+            console.log("Generating image prompt for", character.name)
+            character_description.value = character.description
+            await nextTick()
+            if (!characterPromptTemplate.value) {
+                continue
+            }
+
+            const prompt = (characterPromptTemplate.value as HTMLTemplateElement).innerText
+            const imagePrompt = ref("")
+            await get_response(prompt, imagePrompt)
+            character.imagePrompt = imagePrompt.value
+        }
+
+        if (!character.image) {
+            console.log("Generating image prompt for", character.name)
+            console.log(character.imagePrompt)
+            character.image = await get_image(character.imagePrompt + ", trending on cg society, trending on art station, digital masterpiece, intricate details, high quality, beautiful digital art, matte painting, concept art")
+        }
+
+    }
 
     busy = false
 }
