@@ -1,21 +1,4 @@
 <template>
-    <template ref="locationPromptTemplate">
-        <pre>
-            Start with "{{location_description}}" and then visually describe in 20 words what the location looks like.
-            Add a list of comma separated relevant keywords without a title prefix or starting a new paragraph.
-            In this list you can add details of the location and the things that are there. 
-            Imagine this is a painting and add details about the composition, camera angle and lighting to the keyword list.
-            No more than 50 words in total.
-        </pre>
-    </template>
-    <template ref="characterPromptTemplate">
-        <pre>
-            Start with "{{character_description}}" and then visually describe in 20 words what the character looks like.
-            Add a list of comma separated relevant keywords without a title prefix or starting a new paragraph.
-            Imagine this is a painting and add details about the composition, camera angle and lighting to the keyword list.
-            No more than 50 words in total.
-        </pre>
-    </template>
 </template>
 
 <script setup lang="ts">
@@ -23,12 +6,10 @@ import { useAppStore } from '@/store/app';
 import { get_response } from '@/utils/chatgpt';
 import { nextTick } from 'vue';
 import { ref } from 'vue';
+import { fillTemplate } from '@/utils/template';
+fillTemplate
 
 const store = useAppStore();
-const locationPromptTemplate = ref(null)
-const characterPromptTemplate = ref(null)
-const location_description = ref("")
-const character_description = ref("")
 let busy = false
 
 async function get_image(prompt: string, width = 680, height = 512) {
@@ -81,13 +62,7 @@ const loop = async () => {
     for (const location of store.locations) {
         if (!location.imagePrompt) {
             console.log("Generating image prompt for", location.name)
-            location_description.value = location.description
-            await nextTick()
-            if (!locationPromptTemplate.value) {
-                continue
-            }
-
-            const prompt = (locationPromptTemplate.value as HTMLTemplateElement).innerText
+            const prompt = fillTemplate(store.templates.location_prompt, store, { location_description: location.description })
             const imagePrompt = ref("")
             await get_response(prompt, imagePrompt)
             location.imagePrompt = imagePrompt.value
@@ -100,16 +75,10 @@ const loop = async () => {
         }
     }
 
-    for (const character of store.location.npcs) {
+    for (const character of store.location.npcs || []) {
         if (!character.imagePrompt) {
             console.log("Generating image prompt for", character.name)
-            character_description.value = character.description
-            await nextTick()
-            if (!characterPromptTemplate.value) {
-                continue
-            }
-
-            const prompt = (characterPromptTemplate.value as HTMLTemplateElement).innerText
+            const prompt = fillTemplate(store.templates.character_prompt, store, { character_description: character.description })
             const imagePrompt = ref("")
             await get_response(prompt, imagePrompt)
             character.imagePrompt = imagePrompt.value
@@ -119,6 +88,23 @@ const loop = async () => {
             console.log("Generating image prompt for", character.name)
             console.log(character.imagePrompt)
             character.image = await get_image(character.imagePrompt + ", trending on cg society, trending on art station, digital masterpiece, intricate details, high quality, beautiful digital art, matte painting, concept art")
+        }
+
+    }
+
+    for (const item of store.inventory) {
+        if (!item.imagePrompt) {
+            console.log("Generating image prompt for", item.name)
+            const prompt = fillTemplate(store.templates.inventory_prompt, store, { inventory_description: item.description })
+            const imagePrompt = ref("")
+            await get_response(prompt, imagePrompt)
+            item.imagePrompt = imagePrompt.value
+        }
+
+        if (!item.image) {
+            console.log("Generating image prompt for", item.name)
+            console.log(item.imagePrompt)
+            item.image = await get_image(item.imagePrompt + ", trending on cg society, trending on art station, digital masterpiece, intricate details, high quality, beautiful digital art, matte painting, concept art")
         }
 
     }

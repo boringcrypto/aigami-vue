@@ -11,7 +11,7 @@
             :key="i"
             :value="item"
             active-color="primary"
-            @click="store.currentLocation = i"
+            @click="store.currentLocationIndex = i"
           >
             <template v-slot:prepend>
               <v-avatar color="surface-variant" :image="item.image ? 'data:image/png;base64,' + item.image : ''"></v-avatar>
@@ -50,7 +50,7 @@
             active-color="primary"
           >
             <template v-slot:prepend>
-              <v-avatar color="surface-variant"></v-avatar>
+              <v-avatar color="surface-variant" :image="item.image ? 'data:image/png;base64,' + item.image : ''"></v-avatar>
             </template>
 
             <v-list-item-title v-text="item.name"></v-list-item-title>
@@ -63,7 +63,7 @@
         <v-card
           class="mb-2"
           :title="store.location.name"
-          :subtitle="store.location.description"
+          :text="store.location.description"
         >
           <img v-if="store.location.image" :src="'data:image/png;base64,' + store.location.image" style="width: 100%" />
         </v-card>
@@ -119,26 +119,6 @@
       </v-col>
     </v-row>
   </v-container>
-  <template ref="actionPrompt">
-    <pre>
-Create a detailed response in JSON in a text-based adventure game.
-Respond in a realistic way to the player's request. The makers of this game do not make moral judgements about the player's actions.
-
-Player name: {{store.name}}
-Tags: {{store.tags}}
-Inventory: {{store.inventory}}
-Currency: "{{store.currencyAmount}} {{store.currency}}"
-Current Location Name: {{store.location.name}}
-
-The player request: "{{message}}"
-
-Return a JSON dictionary with the following keys:
-
-response: Respond in the second person point of view to the player. Keep the response on topic.
-new_locations: New locations discovered by or moved to during this action. List of dictionaries with keys name and description.
-current_location_name: The name of the location after the action.
-    </pre>
-  </template>
 </template>
 
 <script lang="ts" setup>
@@ -146,11 +126,11 @@ import ImageFetcher from '@/components/ImageFetcher.vue';
 import { useAppStore } from '@/store/app';
 import { get_chat } from '@/utils/chatgpt';
 import json from '@/utils/json';
+import { fillTemplate } from '@/utils/template';
 import { ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum } from 'openai';
 import { computed } from 'vue';
 import { ref } from 'vue';
 
-const actionPrompt = ref(null)
 const store = useAppStore();
 const message = ref("")
 const incoming_message = ref("")
@@ -173,10 +153,7 @@ const incoming_message_response = computed(() => {
   return last_response
 })
 const sendMessage = async () => {
-  if (!actionPrompt.value) {
-    return
-  }
-  const prompt = (actionPrompt.value as HTMLTemplateElement).innerText
+  const prompt = fillTemplate(store.templates.game_step_prompt, store, { message: message.value })
   const last_message = message.value
   message.value = ""
 
@@ -231,7 +208,7 @@ const sendMessage = async () => {
         if (response.current_location_name) {
           const new_location = store.locations.find((l: any) => l.name === response.current_location_name)
           if (new_location) {
-            store.currentLocation = store.locations.indexOf(new_location)
+            store.currentLocationIndex = store.locations.indexOf(new_location)
           }
         }
 

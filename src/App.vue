@@ -35,7 +35,7 @@ const store = useAppStore();
 const game = localStorage.getItem("game")
 if (game) {
   try {
-    store.$state = json.parse(game)
+    store.$state = JSON.parse(game)
   } catch (e) {
     console.error("Error loading game", e)
   }
@@ -44,7 +44,7 @@ if (game) {
 store.$subscribe((mutation, state) => {
   console.log("state", state);
 
-  localStorage.setItem("game", json.stringify(store.$state))
+  localStorage.setItem("game", JSON.stringify(store.$state))
 });
 
 </script>
