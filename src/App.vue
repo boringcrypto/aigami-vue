@@ -1,13 +1,17 @@
 <template>
+  <ImageFetcher />
   <v-app>
     <v-app-bar
       color="primary"
       prominent
     >
-      <v-toolbar-title>Aigami - {{ store.game_name }}</v-toolbar-title>
+      <v-toolbar-title @click="$router.push('/aigami-vue')" style="cursor: pointer;">Aigami - {{ store.game_name }}</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
+      <v-btn href="/aigami-vue/debug" prepend-icon="mdi-bug">
+        Debug
+      </v-btn>
       <v-btn prepend-icon="mdi-restart">
         New Game
         <NewGame />
@@ -18,7 +22,7 @@
       </v-btn>
     </v-app-bar>
     <v-main>
-      <Home />
+      <router-view />
     </v-main>
   </v-app>
 </template>
@@ -29,6 +33,7 @@ import NewGame from './components/NewGame.vue';
 import Settings from './components/Settings.vue';
 import { useAppStore } from './store/app';
 import json from '@/utils/json'
+import ImageFetcher from './components/ImageFetcher.vue';
 
 const store = useAppStore();
 
@@ -42,8 +47,6 @@ if (game) {
 }
 
 store.$subscribe((mutation, state) => {
-  console.log("state", state);
-
   localStorage.setItem("game", JSON.stringify(store.$state))
 });
 

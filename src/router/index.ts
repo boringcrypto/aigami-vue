@@ -2,28 +2,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  {
-    path: '/aigami-vue',
-    component: () => import('@/layouts/default/Default.vue'),
-    children: [
-      {
-        path: '',
-        name: 'Home',
-        component: () => import('@/views/Home.vue'),
-      },
-    ],
-  },
-  {
-    path: '/',
-    component: () => import('@/layouts/default/Default.vue'),
-    children: [
-      {
-        path: '',
-        name: 'Home',
-        component: () => import('@/views/Home.vue'),
-      },
-    ],
-  },
+  { path: '/aigami-vue', component: () => import('@/views/Home.vue') },
+  { path: '/aigami-vue/debug', component: () => import('@/views/Debug.vue') }
 ]
 
 const router = createRouter({

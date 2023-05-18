@@ -5,16 +5,14 @@ import { AxiosResponse } from "axios";
 import { OpenAIExt } from "openai-ext";
 
 let openai: OpenAIApi;
+let lastUsed: number = 0;
 
 export async function get_chat(messages: ChatCompletionRequestMessage[], response: Ref<string>) {
   const store = useAppStore();
-  console.log(store.keys.openai)
   const configuration = new Configuration({
     apiKey: store.keys.openai,
   });
   openai = new OpenAIApi(configuration);
-
-  console.log(messages)
 
   // Configure the stream (use type ClientStreamChatCompletionConfig for TypeScript users)
   const streamConfig = {
@@ -33,6 +31,15 @@ export async function get_chat(messages: ChatCompletionRequestMessage[], respons
     },
   };
 
+  // Dealing with OpenAI API rate limits
+  // Wait until lastUsed is at least 20 seconds ago
+  while (Date.now() - lastUsed < 20000) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+
+  // Set lastUsed to the current time
+  lastUsed = Date.now();
+  
   // Make the call and store a reference to the XMLHttpRequest
   const xhr = OpenAIExt.streamClientChatCompletion(
     {

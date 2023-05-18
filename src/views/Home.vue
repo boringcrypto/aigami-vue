@@ -1,5 +1,4 @@
 <template>
-  <image-fetcher></image-fetcher>
   <v-container>
     <v-row>
       <v-col cols="4">
@@ -122,7 +121,6 @@
 </template>
 
 <script lang="ts" setup>
-import ImageFetcher from '@/components/ImageFetcher.vue';
 import { useAppStore } from '@/store/app';
 import { get_chat } from '@/utils/chatgpt';
 import json from '@/utils/json';
