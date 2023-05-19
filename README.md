@@ -28,9 +28,9 @@ yarn build
 
 ## Examples
 
-![Cyberpunk New Game](images/CyberPunk-New.jpg)
-![Cyberpunk Game](images/CyberPunk-Game.jpg)
-![Cyberpunk Debug](images/CyberPunk-Debug.jpg)
+![Cyberpunk New Game](public/images/CyberPunk-New.jpg)
+![Cyberpunk Game](public/images/CyberPunk-Game.jpg)
+![Cyberpunk Debug](public/images/CyberPunk-Debug.jpg)
 
-![Waifu New Game](images/Waifu-New.jpg)
-![Waifu Game](images/Waifu-Game.jpg)
+![Waifu New Game](public/images/Waifu-New.jpg)
+![Waifu Game](public/images/Waifu-Game.jpg)
